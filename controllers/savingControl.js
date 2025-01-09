@@ -69,8 +69,11 @@ router.get('/getSaved/:id', async (req, res) => {
         const savedProperties = await Saved.findOne({ userId })
             .populate({
                 path: 'saved',
-                populate: { path: 'sellerId' } 
+                populate: { path: 'sellerId',
+                    populate:'userId'
+                 } 
             })
+           
             .exec();
         
         if (savedProperties) {
