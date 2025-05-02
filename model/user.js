@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    phone: { type: String, sparse: true },
+    phone: { type: String, sparse: true,unique:true },
     bio: { type: String, default: '' }, 
 
         street: { type: String, default: '' },
@@ -19,6 +19,14 @@ const userSchema = new mongoose.Schema({
     contactedProps: { type: [mongoose.Schema.Types.ObjectId], ref: 'Seller', default: [] },
     savedProps: { type: [mongoose.Schema.Types.ObjectId], ref: 'Property', default: [] },
     seller: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller',default:null },
+    resetToken: {
+        type: String,
+        default: null,
+      },
+      resetTokenExpiry: {
+        type: Number,
+        default: null,
+      },
     joiningDate: {
         type: Date,
         default: Date.now,

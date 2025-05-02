@@ -1,8 +1,9 @@
 const Seller = require('../model/seller');
 const express = require('express');
 const router = express.Router();
+const { verifyToken } = require('../routes/token'); 
 
-router.get('/sellerById/:sellerId',async (req,res)=>{
+router.get('/sellerById/:sellerId',verifyToken,async (req,res)=>{
     const id=req.params.sellerId;
     try{
         const seller=await Seller.findById(id).populate('userId');
@@ -23,7 +24,8 @@ router.get('/sellerById/:sellerId',async (req,res)=>{
 
 // Notifications adding
 
-router.post('/addNotification',async (req,res)=>{
+router.post('/addNotification',verifyToken,async (req,res)=>{
+    console.log(req.body)
     const {recieverId,senderId,subject,message}=req.body;
     try{
         const seller=await Seller.findById(recieverId);
@@ -68,13 +70,16 @@ router.get('/getNotifications/:sellerId', async (req, res) => {
 //change status 
 router.put('/changeReadStatus/:id', async (req, res) => {
     const sellerId = req.params.id;
+    console.log("change read status",sellerId)
     try {
         const seller = await Seller.findById(sellerId);
+        console.log("  seller ",seller)
+
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
         seller.notifications.forEach(notification => {
-            notification.read = !notification.read;
+            notification.read = true;
         });
         await seller.save();
 

@@ -4,9 +4,10 @@ const User = require('../model/user');
 const Saved = require('../model/saved');
 const express = require('express');
 const router = express.Router();
+const { verifyToken } = require('../routes/token'); 
 
 // Add route
-router.post('/add/:id', async (req, res) => {
+router.post('/add/:id',verifyToken, async (req, res) => {
     const userId = req.params.id;
     const { propId } = req.body;
 
@@ -36,7 +37,7 @@ router.post('/add/:id', async (req, res) => {
 });
 
 // Remove a property
-router.put('/remove/:id', async (req, res) => {
+router.put('/remove/:id',verifyToken, async (req, res) => {
     const userId = req.params.id;
     const { propId } = req.body;
 
@@ -62,7 +63,7 @@ router.put('/remove/:id', async (req, res) => {
 });
 
 // Get saved properties
-router.get('/getSaved/:id', async (req, res) => {
+router.get('/getSaved/:id',verifyToken, async (req, res) => {
     const userId = req.params.id;
 
     try {
@@ -88,7 +89,7 @@ router.get('/getSaved/:id', async (req, res) => {
 });
 
 
-router.get('/getSavedIds/:id', async (req, res) => {
+router.get('/getSavedIds/:id',verifyToken, async (req, res) => {
     const userId = req.params.id;
 
     try {

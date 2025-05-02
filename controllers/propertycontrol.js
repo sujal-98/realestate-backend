@@ -7,6 +7,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { v2: cloudinary } = require('cloudinary');
+const { verifyToken } = require('../routes/token'); 
 
 cloudinary.config({ 
   cloud_name: process.env.cloudName, 
@@ -17,7 +18,7 @@ cloudinary.config({
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, 
+  limits: { fileSize: 6 * 1024 * 1024 }, 
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   }
@@ -42,7 +43,7 @@ function checkFileType(file, cb) {
   }
 }
 
-router.post('/upload/:id', upload, async (req, res) => {
+router.post('/upload/:id',verifyToken, upload, async (req, res) => {
   const userId = req.params.id;
   const objectId = userId; 
 
@@ -142,7 +143,7 @@ router.post('/upload/:id', upload, async (req, res) => {
 });
 
 //fetch all properties route
-router.get('/sale',async (req,res)=>{
+router.get('/sale',verifyToken, async (req,res)=>{
   const type="selling"
   console.log(type)
   try{
@@ -161,7 +162,7 @@ router.get('/sale',async (req,res)=>{
   }
 })
 
-router.get('/rent',async (req,res)=>{
+router.get('/rent',verifyToken, async (req,res)=>{
   const type="rental"
   console.log(type)
   try{
@@ -181,18 +182,20 @@ router.get('/rent',async (req,res)=>{
 })
 
 //impression route
-router.put('/impressions/:id',async (req,res)=>{
+router.put('/impressions/:id', async (req,res)=>{
   const id=req.params.id
+  console.log(id)
   try{
     const updated=await Property.findByIdAndUpdate(id,{$inc:{impressions:1}},{new:true})
+    console.log(updated)
     if(updated){
-    res.status(200).json({message:"updated",new:updated})
+    res.status(200).json({message:"updated",new:updated,success:true})
   }
   else{
-    res.status(201).json({message:"failed"})
+    res.status(201).json({message:"failed",success:false})
   }
 }catch(error){
-  res.status(400).json({message:error.message})
+  res.status(400).json({message:error.message,success:false})
 }
 })
 

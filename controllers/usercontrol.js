@@ -4,6 +4,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { v2: cloudinary } = require('cloudinary');
+const { verifyToken } = require('../routes/token'); 
 
 cloudinary.config({ 
   cloud_name: process.env.cloudName, 
@@ -14,7 +15,7 @@ cloudinary.config({
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, 
+  limits: { fileSize: 6 * 1024 * 1024 }, 
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   }
@@ -23,24 +24,19 @@ const upload = multer({
 ]);
 
 function checkFileType(file, cb) {
-  const acceptedMIMETypes = /image\/jpeg|image\/jpg|image\/png|application\/pdf/;
+  const filetypes = /jpeg|jpg|png|pdf/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
 
-  const extname = /jpeg|jpg|png|pdf/.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = acceptedMIMETypes.test(file.mimetype.toLowerCase());
-  
-  console.log(`File extension check: ${extname}, MIME type check: ${mimetype}`);
-  console.log(`File mimetype received: ${file.mimetype}`);
-  
-  if (extname) {
-    cb(null, true); 
+  if (mimetype && extname) {
+    return cb(null, true);
   } else {
-    cb(new Error('Error: Images and PDFs Only!')); 
+    cb('Error: Images and PDFs Only!');
   }
 }
 
-
 //fetching user's detail from its id
-router.get('/account/:id', async (req, res) => { 
+router.get('/account/:id',verifyToken ,async (req, res) => { 
     const id = req.params.id; 
     console.log(id)
     try {
@@ -64,7 +60,7 @@ router.get('/account/:id', async (req, res) => {
 
 
 //for updating the user's data with id
-router.put('/update/:id', upload ,async (req, res) => { 
+router.put('/update/:id',verifyToken ,upload ,async (req, res) => { 
     const id = req.params.id; 
     const updatedData = req.body; 
     console.log(id)
@@ -83,8 +79,8 @@ router.put('/update/:id', upload ,async (req, res) => {
           uploadStream.end(file.buffer);
         });
       };
-      if (req.files && req.files['profilePicture'][0] ) {
-        console.log("Profile picture upload detected");
+      if (req.files && req.files['profilePicture']) {
+        console.log("Profile picture upload detected",req.files['profilePicture']);
         const picUrl = await uploadToCloudinary(req.files['profilePicture'][0], {
           resource_type: 'image',
           folder: 'profilePicture'

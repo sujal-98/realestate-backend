@@ -2,7 +2,7 @@ const jwt=require('jsonwebtoken')
 
 
 const verifyToken=(req,res,next)=>{
-    const authhead=req.headers.token
+    const authhead=req.cookies.token
     if(authhead){
         const token=authhead;
         console.log(token)
